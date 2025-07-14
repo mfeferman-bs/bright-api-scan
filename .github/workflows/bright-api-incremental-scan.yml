@@ -74,7 +74,7 @@ jobs:
             echo "[Error]: No new or changed entry points found." >> $GITHUB_OUTPUT
             exit 1
           fi
-          echo "list_eps=$entrypoints.json" >> $GITHUB_OUTPUT
+          echo "list_eps=$entryPoints" >> $GITHUB_OUTPUT
           
       - name: Run Vulnerability Scan
         id: scan
