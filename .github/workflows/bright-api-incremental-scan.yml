@@ -58,17 +58,31 @@ jobs:
 
       - name: List New/Changed Entry Points
         id: list_eps
-        uses: NeuraLegion/bright-github-actions/list-entrypoints@release
-        with:
-          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
-          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
-          status: new
-
-      - name: Fail if No Entry Points Found
-        if: ${{ steps.list_eps.outputs.entrypoints == '[]' }}
+      #   uses: NeuraLegion/bright-github-actions/list-entrypoints@release
+      #   with:
+      #     api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+      #     project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+      #     status: new
         run: |
-          echo "::error::No new or changed entry points found. Skipping scan."
-          exit 1
+          archive_path="${{ inputs.archive_path }}"
+          docker run --rm brightsec/cli entrypoints:list --token "$api_token" --project "$project_id" --status new --status changed > entrypoints.json
+          if [ ! -f entrypoints.json ]; then
+            echo "[Error]: Failed to retrieve entry points. entrypoints.json not found." >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Extract the IDs of the new or changed entry points from the JSON file
+          ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
+          # Formatting IDs...
+          entryPoints=$(for id in $ids; do echo -n "-e $id "; done)
+          # secondary check if any entry points were found
+          if [ -z "$entryPoints" ]; then
+            echo "[Error]: No new or changed entry points found." >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          # If we have new entry points, we can run the scan
+
+          echo "[INFO]: Found new or changed entry points: $entryPoints" >> $GITHUB_OUTPUT
 
       - name: Run Vulnerability Scan
         id: scan
