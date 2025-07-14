@@ -80,11 +80,15 @@ jobs:
           
       - name: Run Vulnerability Scan
         id: scan
-        uses: NeuraLegion/bright-github-actions/run-scan@release
-        with:
-          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
-          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
-          name: "${{ inputs.scan_name }} - ${{ github.run_id }}"
-          entrypoints: ${{ steps.list_eps.outputs.eps }}
+        run: |
+          timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
+          scan_name="API scan $timestamp"
+
+          docker run --rm brightsec/cli scan:run \
+            --token "$API_TOKEN" \
+            --project "$PROJECT_ID" \
+            --bucket "api" \
+            --name "$scan_name" \
+            --entrypoint ${{ steps.ids.outputs.entryPoints }}
           
 
