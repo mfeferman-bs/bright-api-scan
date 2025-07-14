@@ -58,7 +58,7 @@ jobs:
 
       - name: List New/Changed Entry Points
         id: list_eps
-        uses: NeuraLegion/bright-github-actions/list-entrypoints@v1
+        uses: NeuraLegion/bright-github-actions/list-entrypoints@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
