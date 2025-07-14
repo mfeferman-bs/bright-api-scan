@@ -84,6 +84,6 @@ jobs:
           timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
           scan_name="API scan $timestamp"
 
-          docker run --rm brightsec/cli scan:run --token "$API_TOKEN" --project "$PROJECT_ID" --bucket "api" --name "$scan_name" --entrypoint ${{ steps.ids.outputs.eps }}
+          docker run --rm brightsec/cli scan:run --token "$BRIGHT_API_TOKEN" --project "$BRIGHT_PROJECT_ID" --bucket "api" --name "$scan_name" --entrypoint ${{ steps.ids.outputs.eps }}
           
 
