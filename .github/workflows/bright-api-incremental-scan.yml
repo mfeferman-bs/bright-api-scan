@@ -86,6 +86,5 @@ jobs:
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           name: "${{ inputs.scan_name }} - ${{ github.run_id }}"
           entrypoints: ${{ steps.list_eps.outputs.eps }}
-          echo "::info::Started scan" >> $GITHUB_OUTPUT
           
 
