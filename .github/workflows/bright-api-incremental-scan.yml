@@ -62,7 +62,7 @@ jobs:
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
-          status: new,changed
+          status: new
 
       - name: Fail if No Entry Points Found
         if: ${{ steps.list_eps.outputs.entrypoints == '[]' }}
