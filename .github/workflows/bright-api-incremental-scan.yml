@@ -56,25 +56,32 @@ jobs:
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           timeout: 600
 
-      - name: List New/Changed Entry Points
-        id: list_eps
+      - name: Get entrypoints
         run: |
-          archive_path="${{ inputs.archive_path }}"
-          docker run --rm brightsec/cli entrypoints:list --token "$api_token" --project "$project_id" --status new --status changed > entrypoints.json
+          docker run --rm brightsec/cli entrypoints:list \
+            --token "$API_TOKEN" \
+            --project "$PROJECT_ID" \
+            --limit 500 \
+            --status new --status changed > entrypoints.json
+
           if [ ! -f entrypoints.json ]; then
-            echo "::error::Failed to retrieve entry points. entrypoints.json not found." >> $GITHUB_OUTPUT
+            echo "::error::entrypoints.json not found" >> $GITHUB_OUTPUT
             exit 1
           fi
 
+      - name: Format entrypoint IDs
+        id: ids
+        run: |
           ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
+          entryPoints=""
+          for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
 
-          entryPoints=$(for id in $ids; do echo -n "-e $id "; done)
-          
           if [ -z "$entryPoints" ]; then
-            echo "[Error]: No new or changed entry points found." >> $GITHUB_OUTPUT
+            echo "::error::No entrypoints found" >> $GITHUB_OUTPUT
             exit 1
           fi
-          echo "list_eps=$entryPoints" >> $GITHUB_OUTPUT
+
+          echo "entryPoints=$entryPoints" >> $GITHUB_OUTPUT
           
       - name: Run Vulnerability Scan
         id: scan
