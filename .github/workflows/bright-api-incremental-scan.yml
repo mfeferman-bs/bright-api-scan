@@ -58,12 +58,7 @@ jobs:
 
       - name: Get entrypoints
         run: |
-          docker run --rm brightsec/cli entrypoints:list \
-            --token "$API_TOKEN" \
-            --project "$PROJECT_ID" \
-            --limit 500 \
-            --status new --status changed > entrypoints.json
-
+          docker run --rm brightsec/cli entrypoints:list --token "$API_TOKEN" --project "$PROJECT_ID" --limit 500 --status new --status changed > entrypoints.json
           if [ ! -f entrypoints.json ]; then
             echo "::error::entrypoints.json not found" >> $GITHUB_OUTPUT
             exit 1
