@@ -76,14 +76,14 @@ jobs:
             exit 1
           fi
 
-          echo "::info::eps=$entryPoints" >> $GITHUB_OUTPUT
+          echo "eps=$entryPoints" >> $GITHUB_OUTPUT
           
       - name: Run Vulnerability Scan
         id: scan
         run: |
           timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
           scan_name="API scan $timestamp"
-
-          docker run --rm brightsec/cli scan:run --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --bucket "api" --name "$scan_name" --entrypoint ${{ steps.ids.outputs.entryPoints }}
+          scan_id=docker run --rm brightsec/cli scan:run --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --bucket "api" --name "$scan_name" --entrypoint ${{ steps.ids.outputs.eps }}
+          echo "scan started is: $scan_id" >> $GITHUB_OUTPUT
           
 
