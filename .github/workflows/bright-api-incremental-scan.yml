@@ -76,7 +76,7 @@ jobs:
             exit 1
           fi
 
-          echo "entryPoints=$entryPoints" >> $GITHUB_OUTPUT
+          echo "::info::eps=$entryPoints" >> $GITHUB_OUTPUT
           
       - name: Run Vulnerability Scan
         id: scan
@@ -85,14 +85,7 @@ jobs:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           name: "${{ inputs.scan_name }} - ${{ github.run_id }}"
-          entrypoints: ${{ steps.list_eps.outputs.entrypoints }}
+          entrypoints: ${{ steps.list_eps.outputs.eps }}
+          echo "::info::Started scan" >> $GITHUB_OUTPUT
+          
 
-      - name: Wait for Scan Completion
-        uses: NeuraLegion/bright-github-actions/wait-for@release
-        with:
-          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
-          scan: ${{ steps.scan.outputs.id }}
-          wait_for: any
-          code_scanning_alerts: true
-          github_token: ${{ secrets.KEY_GITHUB }}
-          timeout: 900
