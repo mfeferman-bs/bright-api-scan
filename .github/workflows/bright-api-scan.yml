@@ -76,7 +76,7 @@ jobs:
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
-          name: "${{ inputs.scan_name }} - ${{ github.run_id }}"
+          name: "API incremental scan"
           entrypoints: ${{ steps.list_eps.outputs.entrypoints }}
       
       # - name: Format entrypoint IDs
