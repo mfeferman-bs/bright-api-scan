@@ -57,13 +57,18 @@ jobs:
           timeout: 600
 
       - name: Get entrypoints
-        uses: NeuraLegion/list-entrypoints@v1
+        uses: NeuraLegion/list-entrypoints@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           limit: 500
           status: new,changed
         id: entrypoints
+
+      - name: Use Entrypoints
+        run: |
+          echo "Project ID: ${{ steps.entrypoints.outputs.projectId }}"
+          echo "Entrypoints: ${{ steps.entrypoints.outputs.entrypoints }}"
 
       - name: Run Vulnerability Scan
         id: scan
