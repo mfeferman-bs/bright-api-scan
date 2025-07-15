@@ -15,8 +15,6 @@ on:
         required: true
       BRIGHT_PROJECT_ID:
         required: true
-      KEY_GITHUB:
-        required: true
 
 jobs:
   bright_api_scan:
