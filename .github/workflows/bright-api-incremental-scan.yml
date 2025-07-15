@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Discovery
         id: discovery
-        uses: NeuraLegion/bright-github-actions/run-discovery@release
+        uses: NeuraLegion/run-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
@@ -49,7 +49,7 @@ jobs:
           file_id: ${{ steps.upload.outputs.file_id }}
 
       - name: Wait for Discovery to Complete
-        uses: NeuraLegion/bright-github-actions/wait-for-discovery@release
+        uses: NeuraLegion/wait-for-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           discovery_id: ${{ steps.discovery.outputs.id }}
