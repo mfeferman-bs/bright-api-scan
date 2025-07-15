@@ -63,20 +63,16 @@ jobs:
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           limit: 500
           status: new,changed
+        id: entrypoints
 
-      - name: Bright Security Scan
-        id: start
-        uses: NeuraLegion/run-scan@release
+      - name: Run Vulnerability Scan
+        id: scan
+        uses: Neuralegion/run-scan@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
-          name: GitHub scan ${{ github.sha }}
-          discovery_types: |
-            [ "crawler", "archive" ]
-          crawler_urls: |
-            [ "http://vulnerable-bank.com" ]
-          file_id: LiYknMYSdbSZbqgMaC9Sj
-      - name: Get the output scan url
-        run: echo "The scan was started on ${{ steps.start.outputs.url }}"
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          name: "${{ inputs.scan_name }} - ${{ github.run_id }}"
+          entrypoints: ${{ steps.list_eps.outputs.entrypoints }}
       
       # - name: Format entrypoint IDs
       #   id: ids
