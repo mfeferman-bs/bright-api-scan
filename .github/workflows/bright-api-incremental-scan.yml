@@ -28,7 +28,7 @@ jobs:
         id: upload
         run: |
           archive_path="${{ inputs.archive_path }}"
-          archive_id=$(docker run --rm -v "$PWD:$PWD" -w "$PWD" brightsec/cli archive:upload --type openapi --token "${{ secrets.BRIGHT_API_TOKEN }}" --project-id "${{ secrets.BRIGHT_PROJECT_ID }}"   "$archive_path")
+          archive_id=$(docker run --rm -v "$PWD:$PWD" -w "$PWD" brightsec/cli archive:upload --type openapi --token "${{ secrets.BRIGHT_API_TOKEN }}" --project-id "${{ secrets.BRIGHT_PROJECT_ID }}"   "./swagger.json")
 
           if [ -z "$archive_id" ]; then
             echo "::error::Failed to upload archive."
