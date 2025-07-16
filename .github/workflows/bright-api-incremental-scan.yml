@@ -41,7 +41,7 @@ jobs:
         uses: NeuraLegion/run-discovery@release
         with:
           repeaters: |
-            ["czEjKnvkLNwE2asjrBuNdv"]
+            ['czEjKnvkLNwE2asjrBuNdv']
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           discovery_types: |
