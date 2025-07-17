@@ -95,15 +95,9 @@ jobs:
         run: |
           (docker run --rm brightsec/cli entrypoints:list --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --limit 500 --status new --status changed) > entrypoints.json
           if [ ! -f entrypoints.json ]; then
-            echo "entrypoints.json not found" >> $GITHUB_OUTPUT
+            echo "::error::entrypoints.json not found"
             exit 1
           fi
-          echo $entrypoints.json
-
-        
-      - name: Format entrypoint IDs
-        id: ids
-        run: |
           ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
           entryPoints=""
           for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
@@ -113,6 +107,19 @@ jobs:
             exit 1
           fi
           echo "eps=$entryPoints" >> $GITHUB_OUTPUT
+        
+#      - name: Format entrypoint IDs
+#        id: ids
+#        run: |
+#          ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
+#          entryPoints=""
+#          for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
+
+#          if [ -z "$entryPoints" ]; then
+#            echo "No new or changed entrypoints found" >> $GITHUB_OUTPUT
+#            exit 1
+#          fi
+#          echo "eps=$entryPoints" >> $GITHUB_OUTPUT
 
       - name: Run Vulnerability Scan
         id: scan
