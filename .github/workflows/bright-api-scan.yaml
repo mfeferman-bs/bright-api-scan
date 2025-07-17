@@ -49,20 +49,20 @@ jobs:
 
       - name: Run Discovery with Repeater
         if: steps.repeater_check.outputs.has_repeater == 'true'
-        id: discovery
+        id: discoverywr
         uses: NeuraLegion/run-discovery@release
         with:
+          repeaters: |
+            ['${{ secrets.BRIGHT_REPEATER_ID }}']
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           discovery_types: |
             [ "oas" ]
           file_id: ${{ steps.upload.outputs.file_id }}
-          repeaters: |
-            ['${{ secrets.BRIGHT_REPEATER_ID }}']
 
       - name: Run Discovery without Repeater
         if: steps.repeater_check.outputs.has_repeater == 'false'
-        id: discoverywr
+        id: discovery
         uses: NeuraLegion/run-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
