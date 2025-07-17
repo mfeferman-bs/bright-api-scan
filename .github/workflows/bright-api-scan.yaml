@@ -98,7 +98,9 @@ jobs:
             echo "entrypoints.json not found" >> $GITHUB_OUTPUT
             exit 1
           fi
+          echo entrypoints.json
 
+        
       - name: Format entrypoint IDs
         id: ids
         run: |
@@ -107,7 +109,7 @@ jobs:
           for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
 
           if [ -z "$entryPoints" ]; then
-            echo "::error::No entrypoints found" >> $GITHUB_OUTPUT
+            echo "No entrypoints found" >> $GITHUB_OUTPUT
             exit 1
           fi
           echo "eps=$entryPoints" >> $GITHUB_OUTPUT
