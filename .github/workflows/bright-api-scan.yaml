@@ -98,7 +98,7 @@ jobs:
             echo "entrypoints.json not found" >> $GITHUB_OUTPUT
             exit 1
           fi
-          echo entrypoints.json
+          echo $entrypoints.json
 
         
       - name: Format entrypoint IDs
