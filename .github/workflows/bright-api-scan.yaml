@@ -33,7 +33,7 @@ jobs:
           archive_id=$(docker run --rm -v "$PWD:$PWD" -w "$PWD" brightsec/cli archive:upload --type openapi --token "${{ secrets.BRIGHT_API_TOKEN }}" --project-id "${{ secrets.BRIGHT_PROJECT_ID }}" "$archive_path")
 
           if [ -z "$archive_id" ]; then
-            echo "Failed to upload archive." >> $GITHUB_OUTPUT
+            echo "::error::Failed to upload archive."
             exit 1
           fi
           echo "file_id=$archive_id" >> $GITHUB_OUTPUT
@@ -103,7 +103,7 @@ jobs:
           for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
 
           if [ -z "$entryPoints" ]; then
-            echo "No new or changed entrypoints found" >> $GITHUB_OUTPUT
+            echo "::error::No new or changed entrypoints found"
             exit 1
           fi
           echo "eps=$entryPoints" >> $GITHUB_OUTPUT
