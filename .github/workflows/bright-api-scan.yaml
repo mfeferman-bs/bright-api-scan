@@ -49,7 +49,7 @@ jobs:
 
       - name: Run Discovery with Repeater
         if: steps.repeater_check.outputs.has_repeater == 'true'
-        id: discoverywr
+        id: discovery
         uses: NeuraLegion/run-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Run Discovery without Repeater
         if: steps.repeater_check.outputs.has_repeater == 'false'
-        id: discovery
+        id: discoverywr
         uses: NeuraLegion/run-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
@@ -71,8 +71,19 @@ jobs:
             [ "oas" ]
           file_id: ${{ steps.upload.outputs.file_id }}
 
-          
       - name: Wait for Discovery to Complete
+        if: steps.repeater_check.outputs.has_repeater == 'true'
+        id: wfdwr
+        uses: NeuraLegion/wait-for-discovery@release
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          discovery_id: ${{ steps.discoverywr.outputs.id }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          timeout: 600
+
+      - name: Wait for Discovery to Complete
+        if: steps.repeater_check.outputs.has_repeater == 'false'
+        id: wfd
         uses: NeuraLegion/wait-for-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
