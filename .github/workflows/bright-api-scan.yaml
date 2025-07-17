@@ -38,7 +38,30 @@ jobs:
           fi
           echo "file_id=$archive_id" >> $GITHUB_OUTPUT
 
-      - name: Run Discovery
+      - name: Set has_repeater flag
+        id: repeater_check
+        run: |
+          if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
+            echo "has_repeater=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_repeater=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Discovery with Repeater
+        if: steps.repeater_check.outputs.has_repeater == 'true'
+        id: discoverywr
+        uses: NeuraLegion/run-discovery@release
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          discovery_types: |
+            [ "oas" ]
+          file_id: ${{ steps.upload.outputs.file_id }}
+          repeaters: |
+            ['${{ secrets.BRIGHT_REPEATER_ID }}']
+
+      - name: Run Discovery without Repeater
+        if: steps.repeater_check.outputs.has_repeater == 'false'
         id: discovery
         uses: NeuraLegion/run-discovery@release
         with:
@@ -47,8 +70,8 @@ jobs:
           discovery_types: |
             [ "oas" ]
           file_id: ${{ steps.upload.outputs.file_id }}
-          repeaters: ${{ secrets.BRIGHT_REPEATER_ID && format("['{0}']", secrets.BRIGHT_REPEATER_ID) || '' }}
 
+          
       - name: Wait for Discovery to Complete
         uses: NeuraLegion/wait-for-discovery@release
         with:
