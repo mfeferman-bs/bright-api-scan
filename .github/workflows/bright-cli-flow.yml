@@ -56,17 +56,10 @@ jobs:
           # Build repeater argument conditionally
           repeater_arg=""
           if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
-            repeater_arg="--repeater ${{ secrets.BRIGHT_REPEATER_ID }} \\"
+            repeater_arg="--repeater ${{ secrets.BRIGHT_REPEATER_ID }} "
           fi
 
-          dscan_id=$(docker run --rm \
-            brightsec/cli discovery:run \
-            --archive "${{ steps.upload.outputs.file_id }}" \
-            --token "${{ secrets.BRIGHT_API_TOKEN }}" \
-            --project "${{ secrets.BRIGHT_PROJECT_ID }}" \
-            --auth "${{ secrets.BRIGHT_PROJECT_AUTH_ID }}" \
-            repeater_args
-            --name "api discovery")
+          dscan_id=$(docker run --rm brightsec/cli discovery:run --archive "${{ steps.upload.outputs.file_id }}" --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --auth "${{ secrets.BRIGHT_PROJECT_AUTH_ID }}" $repeater_args --name "api discovery")
 
           if [ $? -ne 0 ]; then
             echo "::[error]:: Discovery scan failed to start."
