@@ -108,4 +108,4 @@ jobs:
             repeater_arg="--repeater ${{ secrets.BRIGHT_REPEATER_ID }}"
           fi
 
-          scan_id=$(docker run --rm brightsec/cli scan:run --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --bucket "api client_side server_side legacy business_logic cve" --name "$scan_name" $repeater_arg --entrypoint ${{ steps.ids.outputs.eps }})
+          scan_id=$(docker run --rm brightsec/cli scan:run --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --bucket "api" --bucket "client_side" --bucket "server_side" --bucket "legacy" --bucket "business_logic" --bucket "cve" --name "$scan_name" $repeater_arg --entrypoint ${{ steps.ids.outputs.eps }})
