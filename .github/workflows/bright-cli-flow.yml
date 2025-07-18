@@ -52,7 +52,7 @@ jobs:
       - name: Run_CLI_Discovery
         id: cli_disco
         run: |
-          echo "::info: Starting openapi discovery ..."
+          echo "::info::starting openapi discovery"
           # Build repeater argument conditionally
           repeater_arg=""
           if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
@@ -62,11 +62,11 @@ jobs:
           dscan_id=$(docker run --rm brightsec/cli discovery:run --archive "${{ steps.upload.outputs.file_id }}" --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --auth "${{ secrets.BRIGHT_PROJECT_AUTH_ID }}" $repeater_arg --name "api discovery")
 
           if [ $? -ne 0 ]; then
-            echo "::[error]:: Discovery scan failed to start."
+            echo "::error:: Discovery scan failed to start."
             exit 1
           fi
 
-          echo "::info:: Discovery scan started with ID: $dscan_id"
+          echo "::info::Discovery scan started with ID: $dscan_id"
 
       - name: Wait for Discovery to Complete
         if: steps.repeater_check.outputs.has_repeater == 'false'
