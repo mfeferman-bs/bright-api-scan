@@ -81,7 +81,8 @@ jobs:
       - name: Get entrypoints
         id: ids
         run: |
-          (docker run --rm brightsec/cli entrypoints:list --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --status 'new' --status 'changed' --limit 500) > entrypoints.json 
+          # (docker run --rm brightsec/cli entrypoints:list --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --status 'new' --status 'changed' --limit 500) > entrypoints.json 
+          (docker run --rm brightsec/cli entrypoints:list --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --limit 500) > entrypoints.json 
           if [ ! -f entrypoints.json ]; then
             echo "::error::entrypoints.json not found"
             exit 1
