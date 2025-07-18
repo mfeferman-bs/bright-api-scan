@@ -69,7 +69,6 @@ jobs:
           echo "::info::Discovery scan started with ID: $dscan_id"
 
       - name: Wait for Discovery to Complete
-        if: steps.repeater_check.outputs.has_repeater == 'false'
         id: wfd
         uses: NeuraLegion/wait-for-discovery@release
         with:
