@@ -1,0 +1,112 @@
+name: bright-api-dos-scan
+
+on:
+  workflow_call:
+    inputs:
+      archive_path:
+        required: true
+        type: string
+      scan_name:
+        required: false
+        type: string
+        default: "API DoS Scan"
+    secrets:
+      BRIGHT_API_TOKEN:
+        required: true
+      BRIGHT_PROJECT_ID:
+        required: true
+      BRIGHT_PROJECT_AUTH_ID:
+        required: true
+      BRIGHT_REPEATER_ID:
+        required: false
+
+jobs:
+  bright_api_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload OpenAPI/Swagger file using Bright CLI
+        id: upload
+        run: |
+          archive_path="${{ inputs.archive_path }}"
+          archive_id=$(docker run --rm -v "$PWD:$PWD" -w "$PWD" brightsec/cli archive:upload --type openapi --token "${{ secrets.BRIGHT_API_TOKEN }}" --project-id "${{ secrets.BRIGHT_PROJECT_ID }}" "$archive_path")
+
+          if [ -z "$archive_id" ]; then
+            echo "::error::Failed to upload archive."
+            exit 1
+          fi
+          echo "file_id=$archive_id" >> $GITHUB_OUTPUT
+
+      - name: Set has_repeater flag
+        id: repeater_check
+        run: |
+          if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
+            echo "has_repeater=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_repeater=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run_CLI_Discovery
+        id: cli_disco
+        run: |
+          echo "::info::starting openapi discovery"
+          # Build repeater argument conditionally
+          repeater_arg=""
+          if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
+            repeater_arg="--repeater ${{ secrets.BRIGHT_REPEATER_ID }} "
+          fi
+
+          dscan_id=$(docker run --rm brightsec/cli discovery:run --archive "${{ steps.upload.outputs.file_id }}" --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --auth "${{ secrets.BRIGHT_PROJECT_AUTH_ID }}" $repeater_arg --name "api discovery")
+
+          if [ $? -ne 0 ]; then
+            echo "::error:: Discovery scan failed to start."
+            exit 1
+          fi
+          
+          echo "::info::Discovery scan started with ID: $dscan_id"
+          echo "discoveryScanID=$dscan_id" >> $GITHUB_OUTPUT
+
+      - name: Wait for Discovery to Complete
+        id: wfd
+        uses: NeuraLegion/wait-for-discovery@release
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          discovery_id: ${{ steps.cli_disco.outputs.discoveryScanID }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          timeout: 600
+
+      - name: Get entrypoints
+        id: ids
+        run: |
+          # (docker run --rm brightsec/cli entrypoints:list --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --status 'new' --status 'changed' --limit 500) > entrypoints.json 
+          (docker run --rm brightsec/cli entrypoints:list --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --limit 500) > entrypoints.json 
+          if [ ! -f entrypoints.json ]; then
+            echo "::error::entrypoints.json not found"
+            exit 1
+          fi
+          ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
+          entryPoints=""
+          for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
+
+          if [ -z "$entryPoints" ]; then
+            echo "::error::No new or changed entrypoints found"
+            exit 1
+          fi
+          echo "eps=$entryPoints" >> $GITHUB_OUTPUT        
+
+      - name: Run Vulnerability Scan
+        id: scan
+        run: |
+          timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
+          scan_name="API scan $timestamp"
+
+          # Build repeater argument conditionally
+          repeater_arg=""
+          if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
+            repeater_arg="--repeater ${{ secrets.BRIGHT_REPEATER_ID }}"
+          fi
+
+          scan_id=$(docker run --rm brightsec/cli scan:run --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --bucket "advanced" --name "$scan_name" $repeater_arg --entrypoint ${{ steps.ids.outputs.eps }})
