@@ -67,7 +67,7 @@ jobs:
           fi
           
           echo "::info::Discovery scan started with ID: $dscan_id"
-          echo "discoveryScanID=$dscan_id" >> GITHUB_OUTPUT
+          echo "discoveryScanID=$dscan_id" >> $GITHUB_OUTPUT
 
       - name: Wait for Discovery to Complete
         id: wfd
