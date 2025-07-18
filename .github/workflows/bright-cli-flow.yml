@@ -65,15 +65,16 @@ jobs:
             echo "::error:: Discovery scan failed to start."
             exit 1
           fi
-
+          
           echo "::info::Discovery scan started with ID: $dscan_id"
+          echo "discoveryScanID=$dscan_id" >> GITHUB_OUTPUT
 
       - name: Wait for Discovery to Complete
         id: wfd
         uses: NeuraLegion/wait-for-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
-          discovery_id: ${{ steps.cli_disco.outputs.dscan_id }}
+          discovery_id: ${{ steps.cli_disco.outputs.discoveryScanID }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           timeout: 600
 
