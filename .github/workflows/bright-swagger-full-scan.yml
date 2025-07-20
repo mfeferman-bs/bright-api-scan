@@ -1,4 +1,4 @@
-name: bright-swagger-full-scan
+name: Bright full API scan using swagger 
 
 on:
   workflow_call:
