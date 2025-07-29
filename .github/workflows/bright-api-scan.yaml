@@ -41,7 +41,7 @@ jobs:
       - name: Set has_repeater flag
         id: repeater_check
         run: |
-          if [ -n "$BRIGHT_REPEATER_ID" ]; then
+          if [ -n "$BRID" ]; then
             echo "has_repeater=true" >> $GITHUB_OUTPUT
             echo "Using Repeater ID: $BRID"
           else
