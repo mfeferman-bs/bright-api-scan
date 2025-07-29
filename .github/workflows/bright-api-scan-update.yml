@@ -40,21 +40,26 @@ jobs:
             exit 1
           fi
 
-          echo "file_id=$archive_id" >> $GITHUB_OUTPUT
+          echo "file_id=$archive_id" >> "$GITHUB_OUTPUT"
 
       - name: Set has_repeater flag
         id: repeater_check
         run: |
           if [ -n "$BRIGHT_REPEATER_ID" ]; then
-            echo "has_repeater=true" >> $GITHUB_OUTPUT
-            echo "repeaterID=$BRIGHT_REPEATER_ID" >> $GITHUB_OUTPUT
+            echo "has_repeater=true" >> "$GITHUB_OUTPUT"
+            echo "repeaterID=$BRIGHT_REPEATER_ID" >> "$GITHUB_OUTPUT"
             echo "Using Repeater ID: $BRIGHT_REPEATER_ID"
           else
-            echo "has_repeater=false" >> $GITHUB_OUTPUT
+            echo "has_repeater=false" >> "$GITHUB_OUTPUT"
             echo "Not using Repeater!"
           fi
         env:
           BRIGHT_REPEATER_ID: ${{ secrets.BRIGHT_REPEATER_ID }}
+
+      - name: Debug repeater output
+        run: |
+          echo "Repeater active: ${{ steps.repeater_check.outputs.has_repeater }}"
+          echo "Repeater ID: ${{ steps.repeater_check.outputs.repeaterID }}"
 
       - name: Run Discovery with Repeater
         if: steps.repeater_check.outputs.has_repeater == 'true'
@@ -62,7 +67,7 @@ jobs:
         uses: NeuraLegion/run-discovery@release
         with:
           repeaters: |
-            ['${{ steps.repeater_check.outputs.repeaterID }}']
+            ["${{ steps.repeater_check.outputs.repeaterID }}"]
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           discovery_types: |
@@ -125,7 +130,7 @@ jobs:
             exit 1
           fi
 
-          echo "eps=$entryPoints" >> $GITHUB_OUTPUT
+          echo "eps=$entryPoints" >> "$GITHUB_OUTPUT"
 
       - name: Run Vulnerability Scan
         id: scan
@@ -147,4 +152,3 @@ jobs:
             ${{ steps.ids.outputs.eps }})
 
           echo "Scan ID: $scan_id"
-
