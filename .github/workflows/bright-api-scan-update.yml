@@ -48,18 +48,11 @@ jobs:
           if [ -n "$BRIGHT_REPEATER_ID" ]; then
             echo "has_repeater=true" >> "$GITHUB_OUTPUT"
             echo "repeaterID=$BRIGHT_REPEATER_ID" >> "$GITHUB_OUTPUT"
-            echo "Using Repeater ID: $BRIGHT_REPEATER_ID"
           else
             echo "has_repeater=false" >> "$GITHUB_OUTPUT"
-            echo "Not using Repeater!"
           fi
         env:
           BRIGHT_REPEATER_ID: ${{ secrets.BRIGHT_REPEATER_ID }}
-
-      - name: Debug repeater output
-        run: |
-          echo "Repeater active: ${{ steps.repeater_check.outputs.has_repeater }}"
-          echo "Repeater ID: ${{ steps.repeater_check.outputs.repeaterID }}"
 
       - name: Run Discovery with Repeater
         if: steps.repeater_check.outputs.has_repeater == 'true'
