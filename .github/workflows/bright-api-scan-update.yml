@@ -1,1 +1,150 @@
+name: bright-api-incremental-scan
+
+on:
+  workflow_call:
+    inputs:
+      archive_path:
+        required: true
+        type: string
+      scan_name:
+        required: false
+        type: string
+        default: "Incremental API Scan"
+    secrets:
+      BRIGHT_API_TOKEN:
+        required: true
+      BRIGHT_PROJECT_ID:
+        required: true
+      BRIGHT_REPEATER_ID:
+        required: false
+
+jobs:
+  bright_api_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload OpenAPI/Swagger file using Bright CLI
+        id: upload
+        run: |
+          archive_id=$(docker run --rm -v "$PWD:$PWD" -w "$PWD" brightsec/cli archive:upload \
+            --type openapi \
+            --token "${{ secrets.BRIGHT_API_TOKEN }}" \
+            --project-id "${{ secrets.BRIGHT_PROJECT_ID }}" \
+            "${{ inputs.archive_path }}")
+
+          if [ -z "$archive_id" ]; then
+            echo "::error::Failed to upload archive."
+            exit 1
+          fi
+
+          echo "file_id=$archive_id" >> $GITHUB_OUTPUT
+
+      - name: Set has_repeater flag
+        id: repeater_check
+        run: |
+          if [ -n "$BRIGHT_REPEATER_ID" ]; then
+            echo "has_repeater=true" >> $GITHUB_OUTPUT
+            echo "repeaterID=$BRIGHT_REPEATER_ID" >> $GITHUB_OUTPUT
+            echo "Using Repeater ID: $BRIGHT_REPEATER_ID"
+          else
+            echo "has_repeater=false" >> $GITHUB_OUTPUT
+            echo "Not using Repeater!"
+          fi
+        env:
+          BRIGHT_REPEATER_ID: ${{ secrets.BRIGHT_REPEATER_ID }}
+
+      - name: Run Discovery with Repeater
+        if: steps.repeater_check.outputs.has_repeater == 'true'
+        id: discoverywr
+        uses: NeuraLegion/run-discovery@release
+        with:
+          repeaters: |
+            ['${{ steps.repeater_check.outputs.repeaterID }}']
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          discovery_types: |
+            [ "oas" ]
+          file_id: ${{ steps.upload.outputs.file_id }}
+
+      - name: Run Discovery without Repeater
+        if: steps.repeater_check.outputs.has_repeater == 'false'
+        id: discovery
+        uses: NeuraLegion/run-discovery@release
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          discovery_types: |
+            [ "oas" ]
+          file_id: ${{ steps.upload.outputs.file_id }}
+
+      - name: Wait for Discovery to Complete (with Repeater)
+        if: steps.repeater_check.outputs.has_repeater == 'true'
+        id: wfdwr
+        uses: NeuraLegion/wait-for-discovery@release
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          discovery_id: ${{ steps.discoverywr.outputs.id }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          timeout: 600
+
+      - name: Wait for Discovery to Complete (no Repeater)
+        if: steps.repeater_check.outputs.has_repeater == 'false'
+        id: wfd
+        uses: NeuraLegion/wait-for-discovery@release
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          discovery_id: ${{ steps.discovery.outputs.id }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
+          timeout: 600
+
+      - name: Get entrypoints
+        id: ids
+        run: |
+          docker run --rm brightsec/cli entrypoints:list \
+            --token "${{ secrets.BRIGHT_API_TOKEN }}" \
+            --project "${{ secrets.BRIGHT_PROJECT_ID }}" \
+            --limit 500 > entrypoints.json 
+
+          if [ ! -s entrypoints.json ]; then
+            echo "::error::entrypoints.json not found or empty"
+            exit 1
+          fi
+
+          ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
+          entryPoints=""
+          for id in $ids; do
+            entryPoints+="-e $id "
+            echo "$id"
+          done
+
+          if [ -z "$entryPoints" ]; then
+            echo "::error::No entrypoints found"
+            exit 1
+          fi
+
+          echo "eps=$entryPoints" >> $GITHUB_OUTPUT
+
+      - name: Run Vulnerability Scan
+        id: scan
+        run: |
+          timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
+          scan_name="${{ inputs.scan_name }} - $timestamp"
+
+          repeater_arg=""
+          if [ "${{ steps.repeater_check.outputs.has_repeater }}" == "true" ]; then
+            repeater_arg="--repeater ${{ steps.repeater_check.outputs.repeaterID }}"
+          fi
+
+          scan_id=$(docker run --rm brightsec/cli scan:run \
+            --token "${{ secrets.BRIGHT_API_TOKEN }}" \
+            --project "${{ secrets.BRIGHT_PROJECT_ID }}" \
+            --bucket "api" \
+            --name "$scan_name" \
+            $repeater_arg \
+            ${{ steps.ids.outputs.eps }})
+
+          echo "Scan ID: $scan_id"
 
