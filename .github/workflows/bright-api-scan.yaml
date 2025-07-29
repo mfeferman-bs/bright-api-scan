@@ -108,19 +108,6 @@ jobs:
           fi
           echo "eps=$entryPoints" >> $GITHUB_OUTPUT
         
-#      - name: Format entrypoint IDs
-#        id: ids
-#        run: |
-#          ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
-#          entryPoints=""
-#          for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
-
-#          if [ -z "$entryPoints" ]; then
-#            echo "No new or changed entrypoints found" >> $GITHUB_OUTPUT
-#            exit 1
-#          fi
-#          echo "eps=$entryPoints" >> $GITHUB_OUTPUT
-
       - name: Run Vulnerability Scan
         id: scan
         run: |
