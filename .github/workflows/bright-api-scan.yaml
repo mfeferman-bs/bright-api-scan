@@ -45,7 +45,7 @@ jobs:
             echo "has_repeater=true" >> $GITHUB_OUTPUT
             echo "Using Repeater!"
             echo "repeaterID=${{ secrets.BRIGHT_REPEATER_ID }}" >> $GITHUB_OUTPUT
-            echo "repeaterID"
+            echo repeaterID
           else
             echo "has_repeater=false" >> $GITHUB_OUTPUT
             echo "Not using Repeater!"
