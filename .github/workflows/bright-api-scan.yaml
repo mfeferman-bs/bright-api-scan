@@ -44,7 +44,8 @@ jobs:
           if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
             echo "has_repeater=true" >> $GITHUB_OUTPUT
             echo "Using Repeater!"
-            echo "${{ secrets.BRIGHT_REPEATER_ID }}"
+            echo "repeaterID=${{ secrets.BRIGHT_REPEATER_ID }}" >> $GITHUB_OUTPUT
+            echo "repeaterID"
           else
             echo "has_repeater=false" >> $GITHUB_OUTPUT
             echo "Not using Repeater!"
@@ -56,7 +57,7 @@ jobs:
         uses: NeuraLegion/run-discovery@release
         with:
           repeaters: |
-            ['${{ secrets.BRIGHT_REPEATER_ID }}']
+            ['steps.repeater_check.outputs.repeaterID']
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           discovery_types: |
