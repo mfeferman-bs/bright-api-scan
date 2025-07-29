@@ -121,7 +121,7 @@ jobs:
           # Build repeater argument conditionally
           repeater_arg=""
           if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
-            repeater_arg="--repeater ${{ secrets.BRIGHT_REPEATER_ID }}"
+            repeater_arg="--repeater steps.repeater_check.outputs.repeaterID"
           fi
 
           scan_id=$(docker run --rm brightsec/cli scan:run --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --bucket "api" --name "$scan_name" $repeater_arg --entrypoint ${{ steps.ids.outputs.eps }})
