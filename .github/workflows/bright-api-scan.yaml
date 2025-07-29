@@ -43,13 +43,13 @@ jobs:
         run: |
           if [ -n "$BRIGHT_REPEATER_ID" ]; then
             echo "has_repeater=true" >> $GITHUB_OUTPUT
-            echo "Using Repeater ID: $BRIGHT_REPEATER_ID"
+            echo "Using Repeater ID: $BRID"
           else
             echo "has_repeater=false" >> $GITHUB_OUTPUT
             echo "Not using Repeater!"
           fi
         env:
-          BRIGHT_REPEATER_ID: ${{ secrets.BRIGHT_REPEATER_ID }}
+          BRID: ${{ secrets.BRIGHT_REPEATER_ID }}
 
 
       - name: Run Discovery with Repeater
@@ -58,7 +58,7 @@ jobs:
         uses: NeuraLegion/run-discovery@release
         with:
           repeaters: |
-            ['${{ steps.repeater_check.outputs.BRIGHT_REPEATER_ID }}']
+            ['${{ steps.repeater_check.outputs.BRID }}']
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           discovery_types: |
@@ -121,8 +121,8 @@ jobs:
 
           # Build repeater argument conditionally
           repeater_arg=""
-          if [ -n "${{ steps.repeater_check.outputs.BRIGHT_REPEATER_ID }}" ]; then
-            repeater_arg="--repeater ${{ steps.repeater_check.outputs.BRIGHT_REPEATER_ID }}"
+          if [ -n "${{ steps.repeater_check.outputs.BRID }}" ]; then
+            repeater_arg="--repeater ${{ steps.repeater_check.outputs.BRID }}"
           fi
 
           scan_id=$(docker run --rm brightsec/cli scan:run --token "${{ secrets.BRIGHT_API_TOKEN }}" --project "${{ secrets.BRIGHT_PROJECT_ID }}" --bucket "api" --name "$scan_name" $repeater_arg --entrypoint ${{ steps.ids.outputs.eps }})
