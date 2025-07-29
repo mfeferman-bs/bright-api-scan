@@ -43,8 +43,11 @@ jobs:
         run: |
           if [ -n "${{ secrets.BRIGHT_REPEATER_ID }}" ]; then
             echo "has_repeater=true" >> $GITHUB_OUTPUT
+            echo "Using Repeater!"
+            echo "${{ secrets.BRIGHT_REPEATER_ID }}"
           else
             echo "has_repeater=false" >> $GITHUB_OUTPUT
+            echo "Not using Repeater!"
           fi
 
       - name: Run Discovery with Repeater
