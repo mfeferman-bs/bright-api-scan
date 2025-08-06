@@ -1,3 +1,5 @@
+# NOTE: THE WORKFLOWS CONTAINED WITHIN THIS REPO ARE EXAMPLES ONLY.  IF YOU ARE PLANNING TO USE IN A PRODUCTION ENVIRONMENT, GO THROUGH THEM THOROUGHLY AND UPDATE.  YOU HAVE BEEN WARNED!
+
 # 🔍 Bright Security API Scan GitHub Action
 
 This GitHub Action performs an **incremental API vulnerability scan** using [Bright Security](https://brightsec.com/) against an OpenAPI/Swagger file. It supports **optional Repeater usage** for scanning internal or non-public environments, making it suitable for both external and internal API assessments.
