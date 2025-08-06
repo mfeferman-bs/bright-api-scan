@@ -36,10 +36,10 @@ jobs:
           discovery_types: |
             [ "crawler" ]
           crawler_urls: |
-            [ ${{ inputs.crawl_path }} ]
+            [ "${{ inputs.crawl_path }}" ]
           project_id: ${{ inputs.project_id }} # 5W9tVzHKvq8No317koeJTa
           repeaters: |
-            [ ${{ secrets.BRIGHT_REPEATER_ID }} ]
+            [ "${{ inputs.repeater_id }}" ]
       - name: Wait for discovery to finish ⏳
         id: wait-discovery
         uses: NeuraLegion/wait-for-discovery@v1
@@ -74,7 +74,7 @@ jobs:
             [ "crawler" ]
           module: "dast"
           crawler_urls: |
-            [ ${{ inputs.crawl_path }} ]
+            [ "${{ inputs.crawl_path }}" ]
           hosts_filter: |
             [ ]
       - name: Wait for any issues ⏳
