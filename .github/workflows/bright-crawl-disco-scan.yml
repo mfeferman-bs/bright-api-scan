@@ -1,0 +1,78 @@
+name: BC Security Test Example
+
+on:
+  workflow_dispatch:
+
+jobs:
+  security-test:
+    runs-on: ubuntu-latest
+    environment: stable
+    steps:
+      - name: Start Discovery
+        id: start
+        uses: NeuraLegion/run-discovery@release
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          hostname: development.playground.brightsec.com
+          name: Bright Discovery - ${{ github.sha }}
+          discovery_types: |
+            [ "crawler" ]
+          crawler_urls: |
+            [ "https://brokencrystals.com" ]
+          project_id: 5W9tVzHKvq8No317koeJTa # 5W9tVzHKvq8No317koeJTa
+          repeaters: |
+            [ ${{ secrets.BRIGHT_REPEATER_ID }} ]
+      - name: Wait for discovery to finish ⏳
+        id: wait-discovery
+        uses: NeuraLegion/wait-for-discovery@v1
+        continue-on-error: true
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          discovery_id: ${{ steps.start.outputs.id }}
+          project_id: 5W9tVzHKvq8No317koeJTa
+          hostname: development.playground.brightsec.com
+          timeout: 120
+      - name: List entrypoints
+        id: entrypoints
+        uses: NeuraLegion/list-entrypoints@v1.1
+        with:
+          api_token: ${{ secrets.API_KEY }}
+          hostname: https://development.playground.brightsec.com
+          limit: 200
+          project_id: 5W9tVzHKvq8No317koeJTa
+          ids_only: true
+      - name: Use Entrypoints
+        run: |
+          echo "Project ID: ${{ steps.entrypoints.outputs.projectId }}"
+          echo "Entrypoints: ${{ steps.entrypoints.outputs.entrypoints }}"
+      - name: Bright Security Scan 🏁
+        id: scan
+        uses: NeuraLegion/run-scan@v1.2
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          hostname: app.brightsec.com
+          name: GitHub scan ${{ github.sha }}
+          discovery_types: |
+            [ "crawler" ]
+          module: "dast"
+          crawler_urls: |
+            [ "https://brokencrystals.com" ]
+          hosts_filter: |
+            [ ]
+      - name: Wait for any issues ⏳
+        id: wait
+        uses: NeuraLegion/wait-for@v1.1
+        continue-on-error: true
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          hostname: app.brightsec.com
+          scan: ${{ steps.scan.outputs.id }}
+          wait_for: any
+          timeout: 5 
+      - name: Stop the scan 🛑
+        id: stop-scan
+        uses: NeuraLegion/stop-scan@v1.1
+        with:
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          hostname: app.brightsec.com
+          scan: ${{ steps.scan.outputs.id }}
