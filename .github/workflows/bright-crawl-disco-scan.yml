@@ -13,6 +13,9 @@ on:
       repeater_id:
         required: false
         type: string
+      auth_obj_id:
+        required: false
+        type: string
       scan_name:
         required: false
         type: string
@@ -37,6 +40,7 @@ jobs:
             [ "crawler" ]
           crawler_urls: |
             [ "${{ inputs.crawl_path }}" ]
+          auth_object_id: ${{ inputs.auth_obj_id }}
           project_id: ${{ inputs.project_id }} # 5W9tVzHKvq8No317koeJTa
           repeaters: |
             [ "${{ inputs.repeater_id }}" ]
