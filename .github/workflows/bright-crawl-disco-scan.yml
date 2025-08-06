@@ -47,14 +47,14 @@ jobs:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           discovery_id: ${{ steps.start.outputs.id }}
           project_id: ${{ inputs.project_id }}
-          hostname: development.playground.brightsec.com
+          hostname: app.brightsec.com
           timeout: 120
       - name: List entrypoints
         id: entrypoints
         uses: NeuraLegion/list-entrypoints@v1.1
         with:
-          api_token: ${{ secrets.API_KEY }}
-          hostname: https://development.playground.brightsec.com
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          hostname: app.brightsec.com
           limit: 200
           project_id: ${{ inputs.project_id }}
           ids_only: true
