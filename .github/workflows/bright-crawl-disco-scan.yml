@@ -2,6 +2,23 @@ name: BC Security Test Example
 
 on:
   workflow_dispatch:
+    inputs:
+      crawl_path:
+        required: true
+        type: string
+      project_id:
+        required: true
+        type: string
+      repeater_id:
+        required: false
+        type: string
+      scan_name:
+        required: false
+        type: string
+        default: "Bright Security Scan"
+    secrets:
+      BRIGHT_API_TOKEN:
+        required: true
 
 jobs:
   security-test:
@@ -18,8 +35,8 @@ jobs:
           discovery_types: |
             [ "crawler" ]
           crawler_urls: |
-            [ "https://brokencrystals.com" ]
-          project_id: 5W9tVzHKvq8No317koeJTa # 5W9tVzHKvq8No317koeJTa
+            [ ${{ inputs.crawl_path }} ]
+          project_id: ${{ inputs.project_id }} # 5W9tVzHKvq8No317koeJTa
           repeaters: |
             [ ${{ secrets.BRIGHT_REPEATER_ID }} ]
       - name: Wait for discovery to finish ⏳
@@ -29,7 +46,7 @@ jobs:
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
           discovery_id: ${{ steps.start.outputs.id }}
-          project_id: 5W9tVzHKvq8No317koeJTa
+          project_id: ${{ inputs.project_id }}
           hostname: development.playground.brightsec.com
           timeout: 120
       - name: List entrypoints
@@ -39,7 +56,7 @@ jobs:
           api_token: ${{ secrets.API_KEY }}
           hostname: https://development.playground.brightsec.com
           limit: 200
-          project_id: 5W9tVzHKvq8No317koeJTa
+          project_id: ${{ inputs.project_id }}
           ids_only: true
       - name: Use Entrypoints
         run: |
@@ -56,7 +73,7 @@ jobs:
             [ "crawler" ]
           module: "dast"
           crawler_urls: |
-            [ "https://brokencrystals.com" ]
+            [ ${{ inputs.crawl_path }} ]
           hosts_filter: |
             [ ]
       - name: Wait for any issues ⏳
