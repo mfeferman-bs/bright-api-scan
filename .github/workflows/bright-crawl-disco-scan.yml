@@ -30,7 +30,7 @@ jobs:
         uses: NeuraLegion/run-discovery@release
         with:
           api_token: ${{ secrets.BRIGHT_API_TOKEN }}
-          hostname: development.playground.brightsec.com
+          hostname: app.brightsec.com
           name: Bright Discovery - ${{ github.sha }}
           discovery_types: |
             [ "crawler" ]
