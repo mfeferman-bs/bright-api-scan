@@ -1,7 +1,8 @@
 name: BC Security Test Example
 
 on:
-  workflow_dispatch:
+  workflow_call:
+
     inputs:
       crawl_path:
         required: true
