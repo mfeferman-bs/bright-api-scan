@@ -1,4 +1,4 @@
-name: Updated Bright API Scan
+name: Bright Swagger API Scan
 
 on:
   workflow_call:
