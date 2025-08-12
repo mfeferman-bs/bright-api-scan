@@ -1,4 +1,4 @@
-name: BC Security Test Example
+name: Bright Security Crawl and Scan
 
 on:
   workflow_call:
